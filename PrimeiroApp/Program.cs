@@ -6,7 +6,8 @@ namespace PrimeiroApp
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World! I modified my code!");
+            var texto = "Testando";
+            Console.WriteLine(texto);
         }
     }
 }
