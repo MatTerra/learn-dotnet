@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Mvc;
 using Shop.Models;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using Shop.Data;
+using Microsoft.EntityFrameworkCore;
 
 [Route("categories")]
 public class CategoryController : ControllerBase
@@ -20,7 +22,7 @@ public class CategoryController : ControllerBase
     }
     [HttpPut]
     [Route("{id:int}")]
-    public async Task<ActionResult<Category>> Put(int id, [FromBody] Category model)
+    public async Task<ActionResult<Category>> Put(int id, [FromBody] Category model, [FromServices] DataContext context)
     {
         if (model.Id != id)
             return NotFound(new { message = "Categoria não encontrada" });
@@ -28,15 +30,39 @@ public class CategoryController : ControllerBase
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        return Ok(model);
+        try
+        {
+            context.Entry<Category>(model).State = EntityState.Modified;
+            await context.SaveChangesAsync();
+            return Ok(model);
+        }
+        catch
+        {
+            return BadRequest(new { message = "Não foi possível atualizar a categoria" });
+        }
+
     }
     [HttpPost]
     [Route("")]
-    public async Task<ActionResult<Category>> Post([FromBody] Category model)
+    public async Task<ActionResult<Category>> Post(
+        [FromBody] Category model,
+        [FromServices] DataContext context
+    )
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
-        return Ok(model);
+
+        try
+        {
+            context.Categories.Add(model);
+            await context.SaveChangesAsync();
+            return Ok(model);
+        }
+        catch
+        {
+            return BadRequest(new { message = "Não foi possível criar a categoria" });
+        }
+
     }
     [HttpDelete]
     [Route("{id:int}")]
